@@ -1,13 +1,19 @@
-# Sample Hardhat Project
+# album-tracker
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+hardhat solidity pet-project (guidedao)
 
-Try running some of the following tasks:
 
 ```shell
 npx hardhat help
 npx hardhat test
 REPORT_GAS=true npx hardhat test
 npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.js
+# npx hardhat ignition deploy ./ignition/modules/Lock.js
 ```
+
+TODO:
+[+] комментирование контрактов
+[-] импорт chai, deploy контракта, создание альбома, как подключать к тестам hardhat ethers.js
+[-] тест: получить адресс контракта развернутого, подключиться к контракту, получить стейты контракта под expext()
+[-] тест: проверить что альбом добавляется в mapping, получить его структуру данных,   
+[-] тестирование

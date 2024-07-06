@@ -17,6 +17,9 @@ contract Album {
         tracker = _tracker;
     }
 
+    /**
+     * @notice album pursharing
+     */
     receive() external payable {
         require(!purchared, "This album is already purchared!");
         require(price == msg.value, "We accept only full payments!");
