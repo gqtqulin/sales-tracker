@@ -18,7 +18,7 @@ contract Album {
     }
 
     /**
-     * @notice album pursharing
+     * @notice album purcharing
      */
     receive() external payable {
         require(!purchared, "This album is already purchared!");
