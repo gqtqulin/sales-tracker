@@ -1,9 +1,8 @@
 
 const { expect } = require("chai")
 const { ethers } = require("hardhat")
-const {
-    loadFixture
-} = require("@nomicfoundation/hardhat-toolbox/network-helpers")
+const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers")
+
 
 describe("AlbumTracker", () => {
 
@@ -18,22 +17,23 @@ describe("AlbumTracker", () => {
     }
 
     describe("deploy", () => {
-        it("deploy AlbumTracker contract & create album", async () => {
+        it("deploys album", async () => {
             const { 
                 albumTracker, owner
              } = await loadFixture(deployFixture)
 
-            const title = "Чай вдвоем"
+            const title = "Чай вдвоем - Слава КПСС"
             const price = ethers.parseEther("0.00005")
-            await createAlbum(albumTracker, title, price)
+            const createAlbumTx = await createAlbum(albumTracker, title, price)
     
-            const expectedAlbumAddr = await precomputeAddress(albumTracker) // -- адрес 
+            const expectedAlbumAddr = await precomputeAddress(albumTracker) // -- адрес дочернего контракта
             
-            // const album = albumTracker.connect(expectedAlbumAddr)
-            const albumFactory = await ethers.getContractFactory("AlbumTracker")
-            const album = albumFactory.connect(expectedAlbumAddr)
-    
-            console.log(await album.price())
+            const album = await ethers.getContractAt("Album", expectedAlbumAddr)
+            await album.waitForDeployment()
+
+            expect(await album.price()).to.equal(price)
+            expect(await album.title()).to.equal(title)
+            expect(await album.purchared()).to.false
         })
     })
 
