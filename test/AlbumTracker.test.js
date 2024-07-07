@@ -35,7 +35,8 @@ describe("AlbumTracker", () => {
             const createAlbumTx = await createAlbum(albumTracker, title, price)
             //console.log(`createAlbumTx: ${JSON.stringify(createAlbumTx)}`)
     
-            const expectedAlbumAddr = await precomputeAddress(albumTracker) // -- адрес дочернего контракта
+            // -- адрес дочернего контракта
+            const expectedAlbumAddr = await precomputeAddress(albumTracker)
             
             const album = await ethers.getContractAt("Album", expectedAlbumAddr)
             await album.waitForDeployment()
@@ -47,7 +48,7 @@ describe("AlbumTracker", () => {
             expect(await albumTracker.currentIndex()).to.equal(1n)
         })
 
-        it("create trigger payment event", async () => {
+        it("tests album purchasing", async () => {
             const {
                 albumTracker, owner, addr1
             } = await loadFixture(deployFixture)
@@ -66,27 +67,104 @@ describe("AlbumTracker", () => {
                 value: price
             }
 
+            /**
+             * проверка на revert при некорректной плате
+             */
+            expect(
+                addr1.sendTransaction({
+                    to: expectedAlbumAddr,
+                    value: ethers.parseEther("0.0000001")
+                })
+            ).to.revertedWith("We accept only full payments!")
+
+            // -- покупка альбома
             const buyTx = await addr1.sendTransaction(buyTxData)
             await buyTx.wait()
-            
-            expect(await album.purchared()).to.true // альбом куплен
+
+            /**
+             * проверка на событие
+             * у определенного контракта было ли событие
+             * со следующими входными параметрами
+             */
+            await expect(buyTx).to.emit(albumTracker, "AlbumStateChange").withArgs(
+                expectedAlbumAddr, 0, title, 1
+            )
+
+            /**
+             * проверка на true во флаге куплен/не куплен
+             */
+            expect(await album.purchared()).to.true 
+
+            /**
+             * после покупки альбома состояние = 1 (Paid)
+             */
             expect(
                 (await albumTracker.albums(0))
-            .state).to.equal(1) // в tracker в albums[0] стейт состояние - 1 (куплен)
+            .state).to.equal(1)
 
+            /**
+             * поменялся баланс у покупатели и контракта
+             */
+            await expect(buyTx).to.changeEtherBalances(
+                [addr1, albumTracker], [-price, price]
+            )
 
-            // -- сделать проверку на событие
-
-
-            // -- сделать проверку на изменение баланса
+            /**
+             * проверка на revert на попытку повторной покупки
+             */
+            expect(
+                addr1.sendTransaction(buyTxData)
+            ).to.be.revertedWith("This album is already purchared!")
 
         })
 
-        // it("delivered trigger event", async () => {
-        //     const {
-        //         albumTracker, owner
-        //     } = await loadFixture(deployFixture)
-        // })
+        it("tests album delivering", async () => {
+            const {
+                albumTracker, owner, addr1
+            } = await loadFixture(deployFixture)
+
+            const title = "Nevermind - Nirvana"
+            const price = ethers.parseEther("0.01")
+            const albumCreateTx = await createAlbum(albumTracker, title, price)
+
+            const expectedAlbumAddr = await precomputeAddress(albumTracker)
+
+            const album = await ethers.getContractAt("Album", expectedAlbumAddr)
+
+            /**
+             * 
+             */
+            expect(
+                albumTracker.triggerDelivery(0)
+            ).to.be.revertedWith("This album is not paid for!")
+
+            const buyTx = await addr1.sendTransaction({
+                to: expectedAlbumAddr,
+                value: price
+            })
+
+            /**
+             * 
+             */
+            expect(
+                await album.purchared()
+            ).to.true
+
+            /**
+             * 
+             */
+            // expect(
+            //     await  addr1.call()albumTracker.triggerDelivery()
+            // ).to.emit()
+
+
+            // проверитб что на доставку делает не owner
+            
+
+            // expect(
+            //     (await albumTracker.albums(0)).state
+            // ).to.equal(2)
+        })
     })
 
 })
