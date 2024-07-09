@@ -76,6 +76,19 @@ describe("AlbumTracker", () => {
             })
         ).to.be.revertedWith("We accept only full payments!")
 
+
+        //  сделать в album revert - require(success, "Sorry, we could not process your transaction.");
+
+        const invalidBuyTxData = buyTxData
+        invalidBuyTxData.a = 1
+
+        await expect(
+            await addr1.sendTransaction({
+                to: expectedAlbumAddr,
+                value: price,
+            })
+        ).to.be.revertedWith("Sorry, we could not process your transaction.")
+
         // -- покупка альбома
         const buyTx = await addr1.sendTransaction(buyTxData)
         await buyTx.wait()
@@ -183,6 +196,7 @@ describe("AlbumTracker", () => {
         ).to.equal(2)
 
     })
+
 })
 
 /**
