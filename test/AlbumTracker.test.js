@@ -69,12 +69,12 @@ describe("AlbumTracker", () => {
         /**
          * проверка на revert при некорректной плате
          */
-        expect(
+        await expect(
             addr1.sendTransaction({
                 to: expectedAlbumAddr,
                 value: ethers.parseEther("0.0000001")
             })
-        ).to.revertedWith("We accept only full payments!")
+        ).to.be.revertedWith("We accept only full payments!")
 
         // -- покупка альбома
         const buyTx = await addr1.sendTransaction(buyTxData)
@@ -131,13 +131,11 @@ describe("AlbumTracker", () => {
         const album = await ethers.getContractAt("Album", expectedAlbumAddr)
 
         /**
-         * 
+         * revert для триггера при неоплаченном альбоме
          */
-        // expect(
-        //     albumTracker.triggerDelivery(0)
-        // ).to.be.revertedWith("This album is not paid for!")
-
-        // albumTracker.triggerDelivery(0)
+        await expect(
+            albumTracker.triggerDelivery(0)
+        ).to.be.revertedWith("This album is not paid for!")
 
         const buyTx = await addr1.sendTransaction({
             to: expectedAlbumAddr,
@@ -166,30 +164,25 @@ describe("AlbumTracker", () => {
             .withArgs(expectedAlbumAddr, 0, title, 1)
 
         const addr1AlbumTracker = albumTracker.connect(addr1)
+
+        /**
+         * откат на использование триггера доставки не владельцем
+         */
         expect(
-            (await addr1AlbumTracker.triggerDelivery(0))
-        ).to.be.revertedWith(`OwnableUnauthorizedAccount("${addr1}")`)
+            addr1AlbumTracker.triggerDelivery(0)
+        ).to.be.reverted
 
-        // await albumTracker.triggerDelivery(0) // -- делаем триггер доставки товара
+        await albumTracker.triggerDelivery(0) // -- делаем триггер доставки товара
         
-        // /**
-        //  * проверяем на состояние доставлено
-        //  */
-        // expect(
-        //     (await albumTracker.albums(0))
-        //         .state
-        // ).to.equal(2)
-        
-        
+        /**
+         * проверяем на состояние у альбома в трэкере = доставлено
+         */
+        expect(
+            (await albumTracker.albums(0))
+                .state
+        ).to.equal(2)
 
-        // проверитб что на доставку делает не owner
-        
-
-        // expect(
-        //     (await albumTracker.albums(0)).state
-        // ).to.equal(2)
     })
-
 })
 
 /**
