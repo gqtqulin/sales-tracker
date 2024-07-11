@@ -4,6 +4,8 @@ hardhat solidity pet-project (guidedao)
 
 ## цель проекта
 
+использование hardhat ethers.js
+использование chai, покрытие тестами
 
 ## hardhat тесты
 

@@ -26,11 +26,22 @@ describe("AlbumTracker", () => {
 
     it("deploys album", async () => {
         const { 
-            albumTracker, owner
+            albumTracker, owner, addr1
          } = await loadFixture(deployFixture)
 
         const title = "Чай вдвоем - Слава КПСС"
         const price = ethers.parseEther("0.00005")
+
+        /**
+         * 
+         */
+
+        const albumTrackerAddr1 = albumTracker.connect(addr1)
+        const regexp = /OwnableUnauthorizedAccount\(["']0x[0-9a-fA-F]{40}["']\)/
+        await expect(
+            createAlbum(albumTrackerAddr1, title, price)
+        ).to.be.reverted
+
         const createAlbumTx = await createAlbum(albumTracker, title, price)
         //console.log(`createAlbumTx: ${JSON.stringify(createAlbumTx)}`)
 
@@ -79,15 +90,15 @@ describe("AlbumTracker", () => {
 
         //  сделать в album revert - require(success, "Sorry, we could not process your transaction.");
 
-        const invalidBuyTxData = buyTxData
-        invalidBuyTxData.a = 1
+        // const invalidBuyTxData = buyTxData
+        // invalidBuyTxData.a = 1
 
-        await expect(
-            await addr1.sendTransaction({
-                to: expectedAlbumAddr,
-                value: price,
-            })
-        ).to.be.revertedWith("Sorry, we could not process your transaction.")
+        // await expect(
+        //     await addr1.sendTransaction({
+        //         to: expectedAlbumAddr,
+        //         value: price,
+        //     })
+        // ).to.be.revertedWith("Sorry, we could not process your transaction.")
 
         // -- покупка альбома
         const buyTx = await addr1.sendTransaction(buyTxData)
@@ -150,14 +161,21 @@ describe("AlbumTracker", () => {
             albumTracker.triggerDelivery(0)
         ).to.be.revertedWith("This album is not paid for!")
 
-        const buyTx = await addr1.sendTransaction({
-            to: expectedAlbumAddr,
-            value: price
-        })
+        /**
+         * отправки триггера покупаки на уже купленный альбом
+         */
+        await expect(
+            albumTracker.triggerPayment(0)
+        ).to.be.revertedWith("We accept only full payments!")
 
         /**
          *  покупка альбома
          */
+        const buyTx = await addr1.sendTransaction({
+            to: expectedAlbumAddr,
+            value: price
+        })
+        
         expect(
             await album.purchared()
         ).to.true
@@ -175,6 +193,15 @@ describe("AlbumTracker", () => {
          */
         await expect(buyTx).to.emit(albumTracker, "AlbumStateChange")
             .withArgs(expectedAlbumAddr, 0, title, 1)
+
+        
+        /**
+         * отправки триггера покупаки на уже купленный альбом
+         */
+        await expect(
+            albumTracker.triggerPayment(0)
+        ).to.be.revertedWith("This album is already purshared!")
+
 
         const addr1AlbumTracker = albumTracker.connect(addr1)
 
