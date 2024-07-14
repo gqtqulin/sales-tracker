@@ -91,13 +91,11 @@ describe("AlbumTracker", () => {
         //  сделать в album revert - require(success, "Sorry, we could not process your transaction.");
 
         // const invalidBuyTxData = buyTxData
-        // invalidBuyTxData.a = 1
+        // console.log(expectedAlbumAddr)
+        // invalidBuyTxData.price = ethers.parseEther("0.01")
 
         // await expect(
-        //     await addr1.sendTransaction({
-        //         to: expectedAlbumAddr,
-        //         value: price,
-        //     })
+        //     addr1.sendTransaction(invalidBuyTxData)
         // ).to.be.revertedWith("Sorry, we could not process your transaction.")
 
         // -- покупка альбома
