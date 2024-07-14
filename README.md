@@ -1,40 +1,30 @@
-# album-tracker
+# album-tracker guide-dao
 
-hardhat solidity pet-project (guidedao)
+## описание
+
+проект-магазин альбомов
+реализован двумя контрактами: трекер (магазин) и альбом (создающийся при создании альбома)
+трекер создает альбомы, имеет триггеры оплаты и доставки 
+альбом содежит информацию по себе и принимает деньги на свой адрес
 
 ## цель проекта
 
-использование hardhat ethers.js
-использование chai, покрытие тестами
+изучение hardhat ethers.js
+изучение chai
+использование hardhat coverage
 
 ## hardhat тесты
 
 
 ```shell
-npx hardhat help
 npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-# npx hardhat ignition deploy ./ignition/modules/Lock.js
 ```
 
-TODO:
-[+] комментирование контрактов
-[+] импорт chai, deploy контракта, создание альбома, как подключать к тестам hardhat ethers.js
-[+] тест AlbumTracker - получить адресс контракта развернутого, подключиться к контракту, получить стейты контракта под expext()
-[+] тест Album - проверить что альбом добавляется в mapping, получить его структуру данных, считать логи с deploy контракта
-и забрать с него topics (адрес нового контракта, посмотреть что там лежит)
-[+] протестировать событие создания
-```js
-    let receiptTx = {} // -- вернувшиеся логи после деплоя 
-    let contract = {} // -- AlbumTracker - контракт, порождающий транзакцию ?
-    // -- await ставится с emit
-    await expect(receiptTx).to.emit(contract, "eventName").withArgs("args", "to", "event") 
-```
-[+] проверить покупку (стейт альбом)
-[+] проверить изменение балансом стейтом:
-```js 
-ethers.changeEthersChanges()
-```
-[-] сделать coverage и дописать тесты
-[-] hardhat-gas-reporter посмотреть как работает
+## план
+
+[x] реализация и комментирование контрактов
+[x] deploy контрактов, тестовое создание альбома
+[x] написать тесты под AlbumTracker
+[x] написать тесты под Alnum
+[x] сделать coverage и написать недостающих тестов
+
